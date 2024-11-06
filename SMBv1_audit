@@ -1,0 +1,33 @@
+Securing SMBv1: A Step-by-Step Guide
+
+Howdy! 👋 Today, I'd like to share my experience securing SMBv1 on my Windows endpoints to enhance their security posture. During an nmap scan, I discovered that some of my endpoints had ports 139 and 445 open, which raised concerns about potential vulnerabilities.
+
+I realize SMBv1 is an outdated protocol and most users should already have this issue resolved, BUT I was surprised to find a few endpoints on our network still using the protocol.
+
+The specific nmap scan I ran to locate each endpoint was:
+
+nmap -T4 -p 139,445 <network IP>/24
+
+- The '-T4' flag is to set the timing template and speed up the scan (more aggressive)
+- The '-p' flag is to specify the specific port(s) to scan
+- I was able to select the entire VLAN using CIDR notation at the end of the network IP
+
+For endpoints that posted the ports were 'open', I took the following steps to remediate the issue effectively:
+
+1. Identify SMBv1 Status: The first step was to open a PowerShell session on the endpoint and determine whether SMBv1 was enabled or disabled. To do this, I used the following command:
+
+sc.exe query mrxsmb10
+
+- If the output shows 'STATE: 1 STOPPED', it indicates that SMBv1 is already disabled, which is a good sign.
+- If it shows 'STATE: 4 RUNNING', it means SMBv1 is enabled and further action is required.
+- If it throws an error; 'FAILED 1060' or says the service is not installed, this means that SMBv1 is already disabled or not present on the system.
+
+3. Disable SMBv1: For endpoints where SMBv1 was found to be enabled, I was able to quickly disable it by using the following command:
+
+Disable-WindowsOptionalFeature -FeatureName SMB1Protocol -Online
+
+4. Reboot the Endpoint: It's crucial to complete the process by rebooting the endpoint.
+
+(Note: The provided commands are based on my personal experience, and I encourage everyone to thoroughly understand the actions they take and their implications before applying them to their own systems.)
+
+In conclusion, securing SMBv1 is a crucial step in fortifying your network against potential cyber threats. If you have any suggestions or alternative approaches to enhance this process further, I'm all ears. Please feel free to share your thoughts, insights, or any experiences you've had with this. 💪
